@@ -1,0 +1,38 @@
+{
+    "name": "slimdash/core",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tom Nguyen",
+            "email": "tom@noogen.net",
+            "homepage": "http://noogen.net",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "url": "https://github.com/slimdash/php-helpers.git",
+            "type": "git"
+        }
+    ],
+    "require": {
+        "php" : "^5.5 || ^7.0",
+        "phpmailer/phpmailer": "^5.2",
+        "psr/log": "^1.0",
+        "tuupola/slim-jwt-auth": "^2.3",
+        "slim/slim": "^3.1",
+        "slimdash/php-helpers": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.5",
+        "vlucas/phpdotenv": "^2.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "SlimDash\\Core\\": "src/"
+        }
+    }
+}
