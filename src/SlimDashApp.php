@@ -26,21 +26,21 @@ class SlimDashApp extends \Slim\App {
 				throw new \Exception($moduleName . ' is not an instance of SlimDashModule');
 			}
 
-			$modules[] = $module;
+			$this->moduleInstances[] = $module;
 		}
 
 		// sort it
-		usort($modules, function ($a, $b) {
+		usort($this->moduleInstances, function ($a, $b) {
 			return $a->getPriority() - $b->getPriority();
 		});
 
 		// push in app module first
 		$appModuleName = $settings['settings']['appmodule'];
-		array_unshift($modules, new $appModuleName());
+		array_unshift($this->moduleInstances, new $appModuleName());
 
 		// load module settings
-		$allSettings = array_merge_recursive($settings, []);
-		foreach ($modules as $module) {
+		$allSetting = array_merge_recursive($settings, []);
+		foreach ($this->moduleInstances as $module) {
 			$allSettings = array_merge_recursive($allSettings, $module->getSettings());
 		}
 
