@@ -39,7 +39,7 @@ class SlimDashApp extends \Slim\App {
 		array_unshift($this->moduleInstances, new $appModuleName());
 
 		// load module settings
-		$allSetting = array_merge_recursive($settings, []);
+		$allSettings = array_merge_recursive($settings, []);
 		foreach ($this->moduleInstances as $module) {
 			$allSettings = array_merge_recursive($allSettings, $module->getSettings());
 		}
