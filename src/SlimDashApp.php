@@ -8,7 +8,7 @@ class SlimDashApp extends \Slim\App {
 	/**
 	 * @var array
 	 */
-	public $moduleInstances = [];
+	protected $moduleInstances = [];
 
 	/**
 	 * Initialize a new instance of ModularApp
@@ -26,17 +26,21 @@ class SlimDashApp extends \Slim\App {
 				throw new \Exception($moduleName . ' is not an instance of SlimDashModule');
 			}
 
-			$this->moduleInstances[$moduleName] = $module;
+			$modules[] = $module;
 		}
 
 		// sort it
-		usort($this->moduleInstances, function ($a, $b) {
+		usort($modules, function ($a, $b) {
 			return $a->getPriority() - $b->getPriority();
 		});
 
+		// push in app module first
+		$appModuleName = $settings['settings']['appmodule'];
+		array_unshift($modules, new $appModuleName());
+
 		// load module settings
 		$allSettings = array_merge_recursive($settings, []);
-		foreach ($this->moduleInstances as $module) {
+		foreach ($modul as $module) {
 			$allSettings = array_merge_recursive($allSettings, $module->getSettings());
 		}
 
