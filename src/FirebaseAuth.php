@@ -15,8 +15,8 @@ class FirebaseAuth extends \Slim\Middleware\JwtAuthentication
     public function decodeToken($token) {
         $rst = $this->decodeToken2($token);
 
-        if (!is_null($rst["token"])) {
-            return $rst["token"];
+        if (is_null($rst["message"])) {
+            return $rst["decoded"];
         }
 
         return false;
@@ -30,12 +30,13 @@ class FirebaseAuth extends \Slim\Middleware\JwtAuthentication
      */
     public function decodeToken2($token)
     {
-         $rst = [
+        $rst = [
             "token" => false,
             "expired" => false,
-            "message" => "",
+            "message" => null,
             "decoded" => null
         ];
+
         try {
             \Firebase\JWT\JWT::$leeway = 8;
             $content     = file_get_contents("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com");
@@ -45,15 +46,13 @@ class FirebaseAuth extends \Slim\Middleware\JwtAuthentication
             $issuer      = 'https://securetoken.google.com/' . $fbpid;
             $rst["token"] = $token;
             $rst["decoded"] = $jwt;
+
             if ($jwt->aud != $fbpid) {
                 $rst["message"] = 'invalid audience ' . $jwt->aud;
-                $rst["token"] = null;
             } elseif ($jwt->iss != $issuer) {
                 $rst["message"] = 'invalid issuer ' . $jwt->iss;
-                $rst["token"] = null;
             } elseif (empty($jwt->sub)) {
                 $rst["message"] = 'invalid sub ' . $jwt->sub;
-                $rst["token"] = null;
             };
         } catch (\Firebase\JWT\ExpiredException $ee) {
             $rst["expired"] = true;
@@ -61,7 +60,6 @@ class FirebaseAuth extends \Slim\Middleware\JwtAuthentication
             // we want to keep the token for use later
         } catch (\Exception $e) {
             $rst["message"] = $e->getMessage();
-            $rst["token"] = null;
         }
 
         return $rst;
