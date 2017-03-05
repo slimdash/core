@@ -9,36 +9,44 @@ class FirebaseAuth extends \Slim\Middleware\JwtAuthentication
     /**
      * Decode the token
      *
-     * @param  string         $$token
-     * @return object|boolean The JWT's payload as a PHP object or false in case of error
+     * @param  string         $token
+     * @return object          
      */
     public function decodeToken($token)
     {
+         $rst = [
+            "token" => false,
+            "expired" => false,
+            "message" => "",
+            "decoded" => null
+        ];
         try {
-            JWT::$leeway = 8;
+            \Firebase\JWT\JWT::$leeway = 8;
             $content     = file_get_contents("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com");
             $kids        = json_decode($content, true);
-            $jwt         = JWT::decode($token, $kids, array('RS256'));
-            $fbpid       = getenv('FIREBASE_PROJECTID');
+            $jwt         = \Firebase\JWT\JWT::decode($token, $kids, array('RS256'));
+            $fbpid       = env('FIREBASE_PROJECTID');
             $issuer      = 'https://securetoken.google.com/' . $fbpid;
+            $rst["token"] = $token;
+            $rst["decoded"] = $jwt;
             if ($jwt->aud != $fbpid) {
-                $this->message = 'Invalid audience';
-                $this->log(LogLevel::WARNING, $this->message, [$token]);
-                return false;
+                $rst["message"] = 'invalid audience ' . $jwt->aud;
+                $rst["token"] = null;
             } elseif ($jwt->iss != $issuer) {
-                $this->message = 'Invalid issuer';
-                $this->log(LogLevel::WARNING, $this->message, [$token]);
-                return false;
+                $rst["message"] = 'invalid issuer ' . $jwt->iss;
+                $rst["token"] = null;
             } elseif (empty($jwt->sub)) {
-                $this->message = 'Invalid user';
-                $this->log(LogLevel::WARNING, $this->message, [$token]);
-                return false;
+                $rst["message"] = 'invalid sub ' . $jwt->sub;
+                $rst["token"] = null;
             };
-            return $token;
-        } catch (\Exception $exception) {
-            $this->message = $exception->getMessage();
-            $this->log(LogLevel::WARNING, $exception->getMessage(), [$token]);
-            return false;
+        } catch (\Firebase\JWT\ExpiredException $ee) {
+            $rst["expired"] = true;
+            $rst["message"] = 'token has expired';
+            // we want to keep the token for use later
+        } catch (\Exception $e) {
+            $rst["message"] = $e->getMessage();
+            $rst["token"] = null;
         }
+        return $rst;
     }
 }
