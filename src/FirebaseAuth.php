@@ -9,10 +9,26 @@ class FirebaseAuth extends \Slim\Middleware\JwtAuthentication
     /**
      * Decode the token
      *
+     * @param string $$token
+     * @return object|boolean The JWT's payload as a PHP object or false in case of error
+     */
+    public function decodeToken($token) {
+        $rst = $this->decodeToken2($token);
+
+        if (!is_null($rst["token"])) {
+            return $rst["token"];
+        }
+
+        return false;
+    }
+
+    /**
+     * Decode the token
+     *
      * @param  string         $token
      * @return object          
      */
-    public function decodeToken($token)
+    public function decodeToken2($token)
     {
          $rst = [
             "token" => false,
@@ -47,6 +63,7 @@ class FirebaseAuth extends \Slim\Middleware\JwtAuthentication
             $rst["message"] = $e->getMessage();
             $rst["token"] = null;
         }
+
         return $rst;
     }
 }

@@ -127,4 +127,46 @@ abstract class SlimDashController
             }
         }
     }
+
+    /**
+     * execute json request
+     * @param  string $url       
+     * @param  array  $inHeaders 
+     * @param  array  $query     
+     * @param  array  $body      
+     * @return object            
+     */
+    public function execJsonRequest($url, $inHeaders, $query, $body = array()) {
+        $client = new \GuzzleHttp\Client(['headers' => ['Authorization' => $inHeaders['Authorization']]]);
+        $response = null;
+        try {
+            if (count($body) > 0) {
+                $response = $client->request('POST', $url, ['query' => $query, 'headers' => $inHeaders, 'json' => $body]);
+            }
+            else {
+                $response = $client->request('GET', $url, ['query' => $query, 'headers' => $inHeaders]);
+            }
+
+            $rawBody = $response->getBody()->getContents();
+            $result = json_decode($rawBody, true);
+        } catch(\GuzzleHttp\Exception\RequestException $e) {
+            if ($e->hasResponse()) {
+                $response = $e->getResponse();
+            }
+        }
+        if (is_null($response)) {
+            return [
+                'raw_body' => null,
+                'code' => 503,
+                'body' => null,
+                'headers' => array()
+            ];
+        }
+        return [
+            'raw_body' => $rawBody,
+            'code' => $response->getStatusCode(),
+            'body' => $result,
+            'headers' => $response->getHeaders()
+        ];
+    }
 }
