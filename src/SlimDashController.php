@@ -137,7 +137,12 @@ abstract class SlimDashController
      * @return object            
      */
     public function execJsonRequest($url, $inHeaders, $query, $body = array()) {
-        $client = new \GuzzleHttp\Client(['headers' => ['Authorization' => $inHeaders['Authorization']]]);
+        $client = new \GuzzleHttp\Client();
+        
+        if (isset($inHeaders['Authorization'])) {
+            $client = new \GuzzleHttp\Client(['headers' => ['Authorization' => $inHeaders['Authorization']]]);
+        }
+
         $response = null;
         try {
             if (count($body) > 0) {
