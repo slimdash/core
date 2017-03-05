@@ -42,7 +42,7 @@ class FirebaseAuth extends \Slim\Middleware\JwtAuthentication
             $content     = file_get_contents("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com");
             $kids        = json_decode($content, true);
             $jwt         = \Firebase\JWT\JWT::decode($token, $kids, array('RS256'));
-            $fbpid       = env('FIREBASE_PROJECTID');
+            $fbpid       = getenv('FIREBASE_PROJECTID');
             $issuer      = 'https://securetoken.google.com/' . $fbpid;
             $rst["token"] = $token;
             $rst["decoded"] = $jwt;
